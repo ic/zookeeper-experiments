@@ -1,0 +1,11 @@
+Zookeeper Experiments
+---------------------
+
+This repository gathers programs based on the Apache Zookeeper coordination middleware (http://zookeeper.apache.org).
+
+Program list:
+  - TODO
+
+Context:
+These experiments are in the primary context of a research project on software verification. The programs should be generic enough to, perhaps, be used elsewhere. Feedbacks are welcome to improve or extend them!
+
