@@ -21,6 +21,10 @@ class SimpleWatcher implements Watcher {
       this.latch = latch;
     }
 
+    public CountDownLatch getLatch() {
+      return this.latch;
+    }
+
     public void process(WatchedEvent event) {
       if (event.getState() == KeeperState.SyncConnected) {
         if (latch != null) {
