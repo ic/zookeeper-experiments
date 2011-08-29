@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+
+<project name="ZooKeeperExperiments" default="run">
+
+    <property name="javac.target" value="1.5" />
+
+    <property name="scope" value="jp.ac.mcg" />
+
+    <property name="src.dir" value="${basedir}/src" />
+
+    <property name="lib.dir" value="${basedir}/lib" />
+    <property name="lib.dir.includes" value="**/*.jar" />
+    <property name="lib.dir.excludes" value="**/excluded/" />
+
+    <property name="build.dir" value="${basedir}/build" />
+    <property name="build.classes" value="${build.dir}/classes"/>
+
+    <path id="java.classpath">
+      <pathelement location="${build.classes}"/>
+      <fileset dir="${lib.dir}">
+        <include name="${lib.dir.includes}" />
+        <exclude name="${lib.dir.excludes}" />
+      </fileset>
+      <fileset dir="${ant.home}/lib">
+        <include name="ant.jar" />
+      </fileset>
+    </path>
+
+    <target name="run" depends="telex" />
+
+    <target name="telex" depends="compile">
+      <java classname="${scope}.Telex" fork="true" failonerror="true">
+	<classpath refid="java.classpath"/>
+      </java>
+    </target>
+
+    <target name="compile">
+      <mkdir dir="${build.classes}" />
+      <javac srcdir="${src.dir}" destdir="${build.classes}" 
+	     includeantruntime="false" target="${javac.target}" debug="on">
+	<classpath refid="java.classpath"/>
+	<compilerarg value="-Xlint:all"/>
+	<compilerarg value="-Xlint:-path"/>
+      </javac>
+    </target>
+    
+</project>
+
