@@ -77,14 +77,15 @@ public class Telex {
             final String msg = new String(handles[id].take());
 	    System.out.println("              " + msg + " > " + "Consumer " + id);
           } catch(KeeperException e) {
-	    System.out.println("Keeper error: " + e.getMessage());
-	    System.exit(2);
+	   // e.printStackTrace();
+	   // System.exit(2);
 	  } catch(InterruptedException e) {
-	    System.out.println("Interrupted: " + e.getMessage());
-	    System.exit(3);
+	   // e.printStackTrace();
+	   // System.exit(3);
 	  }
 	}
       };
+      threads[i].start();
     }
 
     for(int i = 0; i < publishers.length; i++) {
@@ -92,29 +93,30 @@ public class Telex {
       threads[i + consumers.length] = new Thread() {
         public void run() {
 	  try {
+	    System.out.println("Publisher " + id);
 	    for(int idx = 0; idx < vocabulary.length() - 1; idx++) {
               final String msg = vocabulary.substring(idx, idx + 1);
 	      handles[id].offer(msg.getBytes());
 	      System.out.println("Publisher " + id + " > " + msg);
 	    }
           } catch(KeeperException e){
-	    System.out.println("Keeper error: " + e.getMessage());
-	    System.exit(4);
+	  //  e.printStackTrace();
+	  //  System.exit(4);
 	  } catch(InterruptedException e){
-	    System.out.println("Interrupted: " + e.getMessage());
-	    System.exit(5);
+	  //  e.printStackTrace();
+	  //  System.exit(5);
 	  }
 	}
       };
+      threads[i + consumers.length].start();
     }
 
     for(int i = 0; i < (consumers.length + publishers.length); i++) {
       try {
-        threads[i].start();
         threads[i].join();
       } catch(InterruptedException e){
-	System.out.println("Interrupted: " + e.getMessage());
-	System.exit(6);
+//	System.out.println("Interrupted: " + e.getMessage());
+//	System.exit(6);
       }
     }
 
