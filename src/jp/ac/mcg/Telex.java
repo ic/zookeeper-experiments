@@ -25,17 +25,19 @@ import jp.ac.mcg.SimpleWatcher;
 public class Telex {
 
   final String host = "127.0.0.1";
-  final int TIMEOUT = 30000;
+        int    port = 2181;
+
+  final int    TIMEOUT = 30000;
+  final int    RETRY   = 3;
   final String vocabulary = "abcdefghijklmnopqrstuvwxyz";
 
   ZooKeeper[]   consumers;
-  String        directory  = "/telex";
+  String        directory = "/telex";
   SimpleWatcher watcher;
   DistributedQueue[] handles;
-  int           lastPort = 3000;
 
   public static void main(final String[] args) {
-    int numConsumers = 1;
+    int numConsumers = 2;
     if(args.length > 0 && args[0] != null) {
       numConsumers = new Integer(args[0]);
     }
@@ -46,11 +48,11 @@ public class Telex {
     try {
       consumers = new ZooKeeper[numConsumers];
       handles   = new DistributedQueue[numConsumers];
-      watcher   = new SimpleWatcher(numConsumers);
+      watcher   = new SimpleWatcher();
 
       for(int i = 0; i < numConsumers; i++) {
-	consumers[i] = new ZooKeeper(host + ":" + assignPort(), TIMEOUT, watcher);
-	handles[i] = new DistributedQueue(consumers[i], directory, null);
+	consumers[i] = new ZooKeeper(host + ":" + port, TIMEOUT, watcher);
+	handles[i]   = new DistributedQueue(consumers[i], directory, null);
       }
     } catch(IOException e) {
       System.out.println("Initialization error: " + e.getMessage());
@@ -68,73 +70,42 @@ public class Telex {
         public void run() {
 	  try {
 	    System.out.println("Consumer " + id + " started.");
-            final String msg = new String(handles[id].take());
-	    System.out.println("             " + msg + " > Consumer " + id);
-          } catch(KeeperException e) {
-	   // e.printStackTrace();
-	   // System.exit(2);
-	  } catch(InterruptedException e) {
-	   // e.printStackTrace();
-	   // System.exit(3);
-	  }
+	    int    attempts = 0;
+            byte[] msg;
+	    while((msg = handles[id].poll()) != null || attempts < RETRY) {
+	      if (msg == null) {
+	        attempts++;
+	      } else {
+	        System.out.println("            " + (new String(msg)) + " > Consumer " + id);
+	      }
+	    }
+          } catch(KeeperException e) {} catch(InterruptedException e) {}
 	}
       };
       threads[i].start();
     }
 
-    try{
-      System.out.println("Waiting for setup?");
-      Thread.sleep(1000);
-      System.out.println(handles[0].toString());
-    } catch(InterruptedException e) {}
-
     Thread publisher = new Thread() {
       public void run() {
 	try {
-//	  for(int idx = 0; idx < vocabulary.length() - 1; idx++) {
-//	    final String msg = vocabulary.substring(idx, idx + 1);
-	    final String msg = vocabulary.substring(3, 4);
-	    boolean offered = handles[0].offer(msg.getBytes());
-	    System.out.println(offered);
+	  for(int idx = 0; idx < vocabulary.length(); idx++) {
+	    final String msg = vocabulary.substring(idx, idx + 1);
+	    handles[0].offer(msg.getBytes());
 	    System.out.println("Published > " + msg);
-//	  }
-	} catch(KeeperException e){
-	//  e.printStackTrace();
-	//  System.exit(4);
-	} catch(InterruptedException e){
-	//  e.printStackTrace();
-	//  System.exit(5);
-	}
+	  }
+	} catch(KeeperException e) {} catch(InterruptedException e) {}
       }
     };
     publisher.start();
+
     try {
       publisher.join();
-    } catch(InterruptedException e){
-    }
-
-    for(int i = 0; i < consumers.length; i++) {
-      try {
+      for(int i = 0; i < consumers.length; i++) {
         threads[i].join();
-      } catch(InterruptedException e){
-//	System.out.println("Interrupted: " + e.getMessage());
-//	System.exit(6);
       }
-    }
-
-    //try {
-    //  watcher.getLatch().await(TIMEOUT, TimeUnit.MILLISECONDS);
-    //} catch(InterruptedException e) {
-     // e.printStackTrace();
-     // System.exit(3);
-    //}
+    } catch(InterruptedException e) {}
 
     System.out.println("Completed.");
-  }
-
-
-  private int assignPort() {
-    return (lastPort += 1);
   }
 
 }
