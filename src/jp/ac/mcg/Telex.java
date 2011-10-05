@@ -26,13 +26,13 @@ public class Telex {
 
   final String host = "127.0.0.1";
   final int TIMEOUT = 30000;
+  final String vocabulary = "abcdefghijklmnopqrstuvwxyz";
 
-  ZooKeeper[] consumers;
-  String      directory  = "/telex";
-  String      vocabulary = "abcdefghijklmnopqrstuvwxyz";
-  SimpleWatcher     watcher;
+  ZooKeeper[]   consumers;
+  String        directory  = "/telex";
+  SimpleWatcher watcher;
   DistributedQueue[] handles;
-  int       nextPort = 3000;
+  int           lastPort = 3000;
 
   public static void main(final String[] args) {
     int numConsumers = 1;
@@ -134,7 +134,7 @@ public class Telex {
 
 
   private int assignPort() {
-    return (nextPort += 1);
+    return (lastPort += 1);
   }
 
 }
