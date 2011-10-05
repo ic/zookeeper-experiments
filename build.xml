@@ -26,23 +26,40 @@
       </fileset>
     </path>
 
-    <target name="run" depends="telex" />
-
-    <target name="telex" depends="compile">
+    <target name="run" depends="compile">
       <java classname="${scope}.Telex" fork="true" failonerror="true">
 	<classpath refid="java.classpath"/>
+      </java>
+    </target>
+
+    <target name="debug" depends="compile-dbg">
+      <java classname="${scope}.Telex" fork="true" failonerror="true">
+	<classpath refid="java.classpath"/>
+	<jvmarg line="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9009" />
       </java>
     </target>
 
     <target name="compile">
       <mkdir dir="${build.classes}" />
       <javac srcdir="${src.dir}" destdir="${build.classes}" 
-	     includeantruntime="false" target="${javac.target}" debug="on">
+	     includeantruntime="false" target="${javac.target}">
 	<classpath refid="java.classpath"/>
 	<compilerarg value="-Xlint:all"/>
 	<compilerarg value="-Xlint:-path"/>
       </javac>
     </target>
+
+    <target name="compile-dbg">
+      <mkdir dir="${build.classes}" />
+      <javac srcdir="${src.dir}" destdir="${build.classes}"
+	includeantruntime="false" target="${javac.target}"
+	debug="on" debuglevel="lines,vars,source">
+	<classpath refid="java.classpath"/>
+	<compilerarg value="-Xlint:all"/>
+	<compilerarg value="-Xlint:-path"/>
+      </javac>
+    </target>
+
     
 </project>
 
