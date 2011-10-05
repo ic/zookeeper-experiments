@@ -1,11 +1,20 @@
-Zookeeper Experiments
----------------------
-
+-------------------------
+  Zookeeper Experiments
+-------------------------
 This repository gathers programs based on the Apache Zookeeper coordination middleware (http://zookeeper.apache.org).
 
-Program list:
-  - TODO
+Programs list:
+  - Alphabet server (called Telex for now...): A publisher thread sends the alphabet on a distributed queue. Clients on the queue get the letters and put them on the stdout.
 
 Context:
-These experiments are in the primary context of a research project on software verification. The programs should be generic enough to, perhaps, be used elsewhere. Feedbacks are welcome to improve or extend them!
+These experiments are part of self-studies and a research project on software verification. The programs should be generic enough to, perhaps, be used elsewhere. Feedbacks are welcome to improve or extend them! This code is license-free and provided "as-is".
+
+-------------------------
+Telex, an alphabet server
+-------------------------
+Usage:
+  - Start a ZooKeeper server on localhost, port 2181 (see, e.g., a standalone operation on http://zookeeper.apache.org/doc/r3.3.3/zookeeperStarted.html).
+  - From the root directory of the present code, run ant.
+
+The default execution creates 1 publisher and 2 clients. There is only a single publisher for now. The number of clients is a parameter of the main class.
 
